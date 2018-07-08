@@ -23,7 +23,13 @@ fn main() {
     if file_splitted.len() < 2 {
         panic!("File type must be explicitly specified.");
     }
+
+    let supported_file_types = ["png".to_owned(), "jpg".to_owned(), "jpeg".to_owned()];
     let file_type = file_splitted.last().unwrap();
+    if !supported_file_types.contains(&file_type) {
+        panic!("Only jpeg and png files are supported.");
+    }
+
     let file_name = file.get(0..(file.chars().count() - 1 - file_type.chars().count())).unwrap();
 
     let img = match image::open(&Path::new(&file)) {
