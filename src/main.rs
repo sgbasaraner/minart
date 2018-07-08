@@ -38,28 +38,36 @@ fn main() {
         Err(_) => panic!("No such file."),
     };
 
-    let dim_3x = img.dimensions();
+    let image_file = ImageFile {file_name: file_name,
+                                file_extension: file_extension,
+                                image: img};
+
+    process_file(image_file);
+}
+
+fn process_file(file: ImageFile) {
+    let dim_3x = file.image.dimensions();
     let dim_1x = (dim_3x.0 / 3, dim_3x.1 / 3);
     let dim_2x = (dim_1x.0 * 2, dim_1x.1 * 2);
 
     let dimensions = vec![dim_1x, dim_2x];
 
-    let is_png = file_extension.to_lowercase() == "png";
+    let is_png = file.file_extension.to_lowercase() == "png";
 
     for i in 1..4 {
-        let mut name = file_name.to_owned();
+        let mut name = file.file_name.to_owned();
         name.push_str(&format!("-{}x", i));
-        let formatted_file_name = format!("{}.{}", name, file_extension);
+        let formatted_file_name = format!("{}.{}", name, file.file_extension);
         let mut output = File::create(formatted_file_name).unwrap();
         if i == 3 {
             if is_png {
-                img.write_to(&mut output, PNG).unwrap();
+                file.image.write_to(&mut output, PNG).unwrap();
                 continue;
             }
-            img.write_to(&mut output, JPEG).unwrap();
+            file.image.write_to(&mut output, JPEG).unwrap();
             continue;
         }
-        let scaled = img.resize(dimensions[i - 1].0, dimensions[i - 1].1, FilterType::Lanczos3);
+        let scaled = file.image.resize(dimensions[i - 1].0, dimensions[i - 1].1, FilterType::Lanczos3);
         if is_png {
             scaled.write_to(&mut output, PNG).unwrap();
         } else {
