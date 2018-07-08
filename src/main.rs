@@ -25,13 +25,13 @@ fn main() {
         panic!("File type must be explicitly specified.");
     }
 
-    let supported_file_types = ["png".to_owned(), "jpg".to_owned(), "jpeg".to_owned()];
-    let file_type = file_splitted.last().unwrap();
-    if !supported_file_types.contains(&file_type.to_lowercase()) {
+    let supported_file_extensions = ["png".to_owned(), "jpg".to_owned(), "jpeg".to_owned()];
+    let file_extension = file_splitted.last().unwrap();
+    if !supported_file_extensions.contains(&file_extension.to_lowercase()) {
         panic!("Only jpeg and png files are supported.");
     }
 
-    let file_name = file.get(0..(file.chars().count() - 1 - file_type.chars().count())).unwrap();
+    let file_name = file.get(0..(file.chars().count() - 1 - file_extension.chars().count())).unwrap();
 
     let img = match image::open(&Path::new(&file)) {
         Ok(i) => i,
@@ -44,12 +44,12 @@ fn main() {
 
     let dimensions = vec![dim_1x, dim_2x];
 
-    let is_png = file_type.to_lowercase() == "png";
+    let is_png = file_extension.to_lowercase() == "png";
 
     for i in 1..4 {
         let mut name = file_name.to_owned();
         name.push_str(&format!("-{}x", i));
-        let formatted_file_name = format!("{}.{}", name, file_type);
+        let formatted_file_name = format!("{}.{}", name, file_extension);
         let mut output = File::create(formatted_file_name).unwrap();
         if i == 3 {
             if is_png {
@@ -70,6 +70,6 @@ fn main() {
 
 struct ImageFile<'a> {
     file_name: &'a str,
-    file_type: &'a str,
+    file_extension: &'a str,
     image: image::DynamicImage,
 }
