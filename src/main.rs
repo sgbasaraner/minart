@@ -67,3 +67,9 @@ fn main() {
         }
     }
 }
+
+struct ImageFile<'a> {
+    file_name: &'a str,
+    file_type: &'a str,
+    image: image::DynamicImage,
+}
