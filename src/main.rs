@@ -6,7 +6,8 @@ use std::fs::File;
 
 use image::{FilterType,
             GenericImage,
-            PNG};
+            PNG,
+            JPEG};
 
 fn main() {
     let usage = "Usage: minart imagefile.png";
@@ -18,15 +19,15 @@ fn main() {
         panic!(usage)
     };
 
-    // Read file properties
+    // Read file name and extension
     let file_splitted: Vec<String> = file.split(".").map(|s| s.to_string()).collect();;
-    if file_splitted.len() < 2 {
+    if file_splitted.len() < 2 { // To make sure we don't have something like '.jpg' or '.png' as files
         panic!("File type must be explicitly specified.");
     }
 
     let supported_file_types = ["png".to_owned(), "jpg".to_owned(), "jpeg".to_owned()];
     let file_type = file_splitted.last().unwrap();
-    if !supported_file_types.contains(&file_type) {
+    if !supported_file_types.contains(&file_type.to_lowercase()) {
         panic!("Only jpeg and png files are supported.");
     }
 
@@ -43,16 +44,26 @@ fn main() {
 
     let dimensions = vec![dim_1x, dim_2x];
 
+    let is_png = file_type.to_lowercase() == "png";
+
     for i in 1..4 {
         let mut name = file_name.to_owned();
         name.push_str(&format!("-{}x", i));
         let formatted_file_name = format!("{}.{}", name, file_type);
         let mut output = File::create(formatted_file_name).unwrap();
         if i == 3 {
-            img.write_to(&mut output, PNG).unwrap();
+            if is_png {
+                img.write_to(&mut output, PNG).unwrap();
+                continue;
+            }
+            img.write_to(&mut output, JPEG).unwrap();
             continue;
         }
         let scaled = img.resize(dimensions[i - 1].0, dimensions[i - 1].1, FilterType::Lanczos3);
-        scaled.write_to(&mut output, PNG).unwrap();
+        if is_png {
+            scaled.write_to(&mut output, PNG).unwrap();
+        } else {
+            scaled.write_to(&mut output, JPEG).unwrap();
+        }
     }
 }
