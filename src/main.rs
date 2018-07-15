@@ -6,6 +6,8 @@ use std::fs::File;
 
 use image::{FilterType,
             GenericImage,
+            DynamicImage,
+            ImageFormat,
             PNG,
             JPEG};
 
@@ -30,6 +32,7 @@ fn main() {
         Some(s) => s,
         None => panic!("The file needs to have an explicit extension."),
     };
+
     if !supported_file_extensions.contains(&file_extension.to_lowercase()) {
         panic!("Only jpeg and png files are supported.");
     }
@@ -61,26 +64,36 @@ fn process_file(file: ImageFile) {
         let mut name = file.file_name.to_owned();
         name.push_str(&format!("-{}x", i));
         let formatted_file_name = format!("{}.{}", name, file.file_extension);
-        let mut output = File::create(formatted_file_name).unwrap();
+        let mut output = match File::create(formatted_file_name) {
+            Ok(o) => o,
+            Err(_) => panic!("Couldn't create file."),
+        };
         if i == 3 {
             if is_png {
-                file.image.write_to(&mut output, PNG).unwrap();
+                write_file(&file.image, output, PNG);
                 continue;
             }
-            file.image.write_to(&mut output, JPEG).unwrap();
+            write_file(&file.image, output, JPEG);
             continue;
         }
         let scaled = file.image.resize(dimensions[i - 1].0, dimensions[i - 1].1, FilterType::Lanczos3);
         if is_png {
-            scaled.write_to(&mut output, PNG).unwrap();
+            write_file(&scaled, output, PNG);
         } else {
-            scaled.write_to(&mut output, JPEG).unwrap();
+            write_file(&scaled, output, JPEG);
         }
+    }
+}
+
+fn write_file(image: &DynamicImage, mut file: File, format: ImageFormat) {
+    match image.write_to(&mut file, format) {
+        Ok(_) => (),
+        Err(_) => panic!("Couldn't write to file."),
     }
 }
 
 struct ImageFile<'a> {
     file_name: &'a str,
     file_extension: &'a str,
-    image: image::DynamicImage,
+    image: DynamicImage,
 }
