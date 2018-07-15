@@ -26,7 +26,10 @@ fn main() {
     }
 
     let supported_file_extensions = ["png".to_owned(), "jpg".to_owned(), "jpeg".to_owned()];
-    let file_extension = file_splitted.last().unwrap();
+    let file_extension = match file_splitted.last() {
+        Some(s) => s,
+        None => panic!("The file needs to have an explicit extension."),
+    };
     if !supported_file_extensions.contains(&file_extension.to_lowercase()) {
         panic!("Only jpeg and png files are supported.");
     }
